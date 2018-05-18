@@ -46,6 +46,7 @@ public class SignupActivity extends AppCompatActivity {
             }
         });
 
+
         btnSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,5 +105,12 @@ public class SignupActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         progressBar.setVisibility(View.GONE);
+    }
+
+    public void OnClickSignedIn(){
+
+                Intent intent = new Intent(this, LoginActivity.class);
+                startActivity(intent);
+
     }
 }
