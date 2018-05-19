@@ -34,13 +34,17 @@
     <string name="btn_reset_password">Reset Password</string>
     <string name="btn_back"><![CDATA[<< Back]]></string>
     <string name="hint_new_email">New Email</string>
-    <string name="btn_change">Change</string>
-    <string name="btn_send">Send</string>
-    <string name="btn_remove">Remove</string>
+    <string name="btn_change_email">Change Email</string>
+    <string name="btn_change_password">Change Password</string>
+    <string name="btn_send">Send Password Reset Email</string>
+    <string name="btn_remove">Remove User</string>
     <string name="btn_sign_out">Sign Out</string>
+    <string name="btn_sign_in">Login</string>
+    <string name="btn_sign_up">Sign Up</string>
     <string name="lbl_forgot_password">Forgot password?</string>
     <string name="forgot_password_msg">We just need your registered Email Id to sent you password reset instructions.</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_signup">SignupActivity</string>
+    <string name="btn_change_things">Change Password/Username</string>
 
 </resources>

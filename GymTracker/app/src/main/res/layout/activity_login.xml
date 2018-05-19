@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-   >
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -58,13 +57,13 @@
         </android.support.design.widget.TextInputLayout>
 
         <Button
-            android:id="@+id/sign_up_button"
+            android:id="@+id/sign_in_button"
             style="?android:textAppearanceSmall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:background="@color/colorAccent"
-            android:text="@string/action_sign_in_short"
+            android:text="@string/btn_sign_in"
             android:textColor="@android:color/black"
             android:textStyle="bold" />
 
@@ -81,12 +80,12 @@
         <!-- Link to Login Screen -->
 
         <Button
-            android:id="@+id/sign_in_button"
+            android:id="@+id/sign_up_button"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dip"
             android:background="@null"
-            android:text="@string/btn_link_to_login"
+            android:text="New user? Click here to sign up"
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="15dp" />
