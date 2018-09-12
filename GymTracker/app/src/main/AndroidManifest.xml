@@ -31,9 +31,10 @@
         <activity
             android:name=".SignupActivity"
             android:label="Gym Tracker"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ResetPasswordActivity" />
-        <activity android:name=".ChangeActivity"></activity>
+        <activity android:name=".ChangeActivity" />
+        <activity android:name=".EditWorkoutActivity"></activity>
     </application>
 
 </manifest>

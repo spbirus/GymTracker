@@ -16,12 +16,15 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button signOut, change_btn;
+    private Button signOut, change_btn, edit_workout_btn;
 
     private ProgressBar progressBar;
     private FirebaseAuth.AuthStateListener authListener;
@@ -40,12 +43,37 @@ public class MainActivity extends AppCompatActivity {
         ID = getIntent().getStringExtra("id");
 
         //store name and id in database
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        String id = ID; //convert player id to a string to send to database
+        final DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        final String id = ID; //convert player id to a string to send to database
         database.child("Users").child(id).child("Name").setValue(name);
 
+        //might not have to do this here.  Instead put it in the change activity
+        //setup the weeks in the database
+//        database.child("Users").child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot snapshot) {
+//                if (!snapshot.hasChild("Week")) {
+//                    database.child("Users").child(id).child("Week").child("Sunday");
+//                    database.child("Users").child(id).child("Week").child("Monday").setValue("Off day");
+//                    database.child("Users").child(id).child("Week").child("Tuesday").setValue("Off day");
+//                    database.child("Users").child(id).child("Week").child("Wednesday").setValue("Off day");
+//                    database.child("Users").child(id).child("Week").child("Thursday").setValue("Off day");
+//                    database.child("Users").child(id).child("Week").child("Friday").setValue("Off day");
+//                    database.child("Users").child(id).child("Week").child("Saturday").setValue("Off day");
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
+
+
+        //buttons
         signOut = (Button) findViewById(R.id.sign_out);
-        change_btn = (Button) findViewById(R.id.change_btn);
+//        change_btn = (Button) findViewById(R.id.change_btn);
+        edit_workout_btn = (Button) findViewById(R.id.edit_workout);
 
 
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -55,13 +83,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        change_btn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                startActivity(new Intent(MainActivity.this, ChangeActivity.class));
-            }
-
-        });
+//        change_btn.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View v){
+//                startActivity(new Intent(MainActivity.this, ChangeActivity.class));
+//            }
+//
+//        });
 
         signOut.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,6 +97,15 @@ public class MainActivity extends AppCompatActivity {
                 signOut();
             }
         });
+
+        edit_workout_btn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                startActivity(new Intent(MainActivity.this, EditWorkoutActivity.class));
+            }
+
+        });
+
 
     }
 
