@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,6 +16,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,33 +27,22 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener authListener;
     private FirebaseAuth auth;
 
+    String name;
+    String ID;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.v("MainActivity", "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(getString(R.string.app_name));
-        setSupportActionBar(toolbar);
+        name = getIntent().getStringExtra("name"); //grab the name
+        ID = getIntent().getStringExtra("id");
 
-        //get firebase auth instance
-        auth = FirebaseAuth.getInstance();
-
-        //get current user
-        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-        authListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user == null) {
-                    // user auth state is changed - user is null
-                    // launch login activity
-                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                    finish();
-                }
-            }
-        };
+        //store name and id in database
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        String id = ID; //convert player id to a string to send to database
+        database.child("Users").child(id).child("Name").setValue(name);
 
         signOut = (Button) findViewById(R.id.sign_out);
         change_btn = (Button) findViewById(R.id.change_btn);
@@ -91,17 +83,17 @@ public class MainActivity extends AppCompatActivity {
         //progressBar.setVisibility(View.GONE);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        auth.addAuthStateListener(authListener);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (authListener != null) {
-            auth.removeAuthStateListener(authListener);
-        }
-    }
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        auth.addAuthStateListener(authListener);
+//    }
+//
+//    @Override
+//    public void onStop() {
+//        super.onStop();
+//        if (authListener != null) {
+//            auth.removeAuthStateListener(authListener);
+//        }
+//    }
 }

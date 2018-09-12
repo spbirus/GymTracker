@@ -1,114 +1,175 @@
 package com.example.sam.gymtracker;
 
 
-        import android.content.Intent;
-        import android.os.Bundle;
-        import android.support.annotation.NonNull;
-        import android.support.v7.app.AppCompatActivity;
-        import android.support.v7.widget.Toolbar;
-        import android.text.TextUtils;
-        import android.view.View;
-        import android.widget.Button;
-        import android.widget.EditText;
-        import android.widget.ProgressBar;
-        import android.widget.Toast;
 
-        import com.google.android.gms.tasks.OnCompleteListener;
-        import com.google.android.gms.tasks.Task;
-        import com.google.firebase.auth.AuthResult;
-        import com.google.firebase.auth.FirebaseAuth;
+import android.content.*;
+import android.speech.tts.TextToSpeech;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.*;
+import android.widget.*;
 
-public class LoginActivity extends AppCompatActivity {
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.*;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.*;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 
-    private EditText inputEmail, inputPassword;
-    private FirebaseAuth auth;
-    private ProgressBar progressBar;
-    private Button btnSignup, btnLogin, btnReset;
+
+public class LoginActivity extends AppCompatActivity
+        implements GoogleApiClient.OnConnectionFailedListener,
+        GoogleApiClient.ConnectionCallbacks {
+
+    private static final int REQ_CODE_GOOGLE_SIGNIN = 32767 / 2;
+
+    private GoogleApiClient google;
+    private TextToSpeech tts;
+    private boolean isTTSinitialized;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //Get Firebase auth instance
-        auth = FirebaseAuth.getInstance();
-
-        if (auth.getCurrentUser() != null) {
-            startActivity(new Intent(LoginActivity.this, MainActivity.class));
-            finish();
-        }
-
-        // set the view now
         setContentView(R.layout.activity_login);
+        isTTSinitialized = false;
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
-
-        inputEmail = (EditText) findViewById(R.id.email);
-        inputPassword = (EditText) findViewById(R.id.password);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        btnSignup = (Button) findViewById(R.id.sign_up_button);
-        btnLogin = (Button) findViewById(R.id.sign_in_button);
-        btnReset = (Button) findViewById(R.id.btn_reset_password);
-
-        //Get Firebase auth instance
-        auth = FirebaseAuth.getInstance();
-
-        btnSignup.setOnClickListener(new View.OnClickListener() {
+        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
-            public void onClick(View v) {
-                startActivity(new Intent(LoginActivity.this, SignupActivity.class));
+            public void onInit(int status) {
+                isTTSinitialized = true;
             }
         });
 
-        btnReset.setOnClickListener(new View.OnClickListener() {
+        SignInButton button = (SignInButton) findViewById(R.id.sign_in_button);
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(LoginActivity.this, ResetPasswordActivity.class));
+                signInClick(v);
             }
         });
 
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String email = inputEmail.getText().toString();
-                final String password = inputPassword.getText().toString();
+        // request the user's ID, email address, and basic profile
+        GoogleSignInOptions options = new GoogleSignInOptions.Builder(
+                GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
 
-                if (TextUtils.isEmpty(email)) {
-                    Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+        // build API client with access to Sign-In API and options above
+        google = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, options)
+                .addConnectionCallbacks(this)
+                .build();
 
-                if (TextUtils.isEmpty(password)) {
-                    Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
 
-                progressBar.setVisibility(View.VISIBLE);
 
-                //authenticate user
-                auth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                // If sign in fails, display a message to the user. If sign in succeeds
-                                // the auth state listener will be notified and logic to handle the
-                                // signed in user can be handled in the listener.
-                                progressBar.setVisibility(View.GONE);
-                                if (!task.isSuccessful()) {
-                                    // there was an error
-                                    if (password.length() < 6) {
-                                        inputPassword.setError(getString(R.string.minimum_password));
-                                    } else {
-                                        Toast.makeText(LoginActivity.this, getString(R.string.auth_failed), Toast.LENGTH_LONG).show();
-                                    }
-                                } else {
-                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                    startActivity(intent);
-                                    finish();
-                                }
-                            }
-                        });
+    }
+
+
+
+    /*
+     * This method is called when the Sign in with Google button is clicked.
+     * It launches the Google Sign-in activity and waits for a result.
+     */
+    public void signInClick(View view) {
+        Toast.makeText(this, "Sign in was clicked!", Toast.LENGTH_SHORT).show();
+
+
+        // connect to Google server to log in
+        Intent intent = Auth.GoogleSignInApi.getSignInIntent(google);
+        startActivityForResult(intent, REQ_CODE_GOOGLE_SIGNIN);
+    }
+
+
+
+
+
+
+    /*
+     * This method is called when Google Sign-in comes back to my activity.
+     * We grab the sign-in results and display the user's name and email address.
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (requestCode == REQ_CODE_GOOGLE_SIGNIN) {
+            // google sign-in has returned
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
+            if (result.isSuccess()) {
+                // yay; user logged in successfully
+                GoogleSignInAccount acct = result.getSignInAccount();
+                Log.v("login", "success " + acct.getDisplayName() + " " +acct.getEmail());
+
+                mAuth = FirebaseAuth.getInstance();
+                AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+                mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.d("tag", "signInWithCredential", task.getException());
+                            Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Authentication Sucessful.",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+                Intent startIntent = new Intent(this, MainActivity.class );
+                startIntent.putExtra("name",acct.getDisplayName());
+                startIntent.putExtra("id",acct.getId());
+                startActivityForResult(startIntent, 1);
+            } else {
+                Log.v("login", "failure");
             }
-        });
+        }
+    }
+
+    /*
+     * Called when the Speech to Text button is clicked.
+     * Initiates a speech-to-text activity.
+     */
+//    public void speechToTextClick(View view) {
+//        speechToText("Say your favorite color:");   // Stanford Android library method
+//    }
+
+
+
+
+    /*
+     * Called when the Text to Speech button is clicked.
+     * Causes the app to speak aloud.
+     */
+    public void textToSpeechClick(View view) {
+        if (isTTSinitialized) {
+            tts.speak("Congratulations. You clicked a button, genius.",
+                    TextToSpeech.QUEUE_FLUSH, null);
+        }
+    }
+
+    // this method is required for the GoogleApiClient.OnConnectionFailedListener above
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.v("login", "onConnectionFailed");
+    }
+
+    // this method is required for the GoogleApiClient.ConnectionCallbacks above
+    public void onConnected(Bundle bundle) {
+        Log.v("login","onConnected");
+    }
+
+    // this method is required for the GoogleApiClient.ConnectionCallbacks above
+    public void onConnectionSuspended(int i) {
+        Log.v("login","onConnectionSuspended");
     }
 }
