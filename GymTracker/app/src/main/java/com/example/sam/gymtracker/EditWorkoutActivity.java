@@ -39,6 +39,8 @@ public class EditWorkoutActivity extends AppCompatActivity {
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
 
+
+
         //setup the workout list
         workout_list = (LinearLayout) findViewById(R.id.workout_list);
 
@@ -46,7 +48,7 @@ public class EditWorkoutActivity extends AppCompatActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                
+
                 //need to remove all the views before adding new ones from a different day otherwise they just stay on there
                 workout_list.removeAllViews();
 
@@ -57,7 +59,7 @@ public class EditWorkoutActivity extends AppCompatActivity {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         LinearLayout.LayoutParams lparams = new LinearLayout.LayoutParams(
                                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                        TextView item=new TextView(EditWorkoutActivity.this);
+                        TextView item = new TextView(EditWorkoutActivity.this);
                         item.setLayoutParams(lparams);
                         item.setText(dataSnapshot.getValue().toString());
                         workout_list.addView(item);
@@ -79,6 +81,8 @@ public class EditWorkoutActivity extends AppCompatActivity {
 
 
 
-        //TODO: will need to create a new view to add to the list
+        //TODO: will need to move the display portion to the main activity too
+
+        //TODO: add a change feature to this edit workout activity
     }
 }

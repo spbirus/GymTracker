@@ -7,9 +7,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -30,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener authListener;
     private FirebaseAuth auth;
 
+    Spinner spinner;
+    LinearLayout workout_list;
     String name;
     String ID;
 
@@ -47,27 +54,78 @@ public class MainActivity extends AppCompatActivity {
         final String id = ID; //convert player id to a string to send to database
         database.child("Users").child(id).child("Name").setValue(name);
 
-        //might not have to do this here.  Instead put it in the change activity
-        //setup the weeks in the database
-//        database.child("Users").child(id).addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot snapshot) {
-//                if (!snapshot.hasChild("Week")) {
-//                    database.child("Users").child(ID).child("Week").child("Sunday");
-//                    database.child("Users").child(ID).child("Week").child("Monday").setValue("Off day");
-//                    database.child("Users").child(ID).child("Week").child("Tuesday").setValue("Off day");
-//                    database.child("Users").child(ID).child("Week").child("Wednesday").setValue("Off day");
-//                    database.child("Users").child(ID).child("Week").child("Thursday").setValue("Off day");
-//                    database.child("Users").child(ID).child("Week").child("Friday").setValue("Off day");
-//                    database.child("Users").child(ID).child("Week").child("Saturday").setValue("Off day");
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
+        //Setup the dropdown to get the days of the week
+        spinner = (Spinner) findViewById(R.id.spinner2);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.days_array, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinner.setAdapter(adapter);
+
+
+
+        //setup the workout list
+        workout_list = (LinearLayout) findViewById(R.id.main_workout);
+
+        //need to check if the spinner has changed
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+                //need to remove all the views before adding new ones from a different day otherwise they just stay on there
+                workout_list.removeAllViews();
+
+                //need to look at the database and grab the "Day" value from the correct day of the week
+                final DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+                database.child("Users").child(ID).child("Week").child(spinner.getSelectedItem().toString()).child("Day").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        LinearLayout.LayoutParams lparams = new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                        TextView item = new TextView(MainActivity.this);
+                        item.setLayoutParams(lparams);
+                        item.setText(dataSnapshot.getValue().toString());
+                        workout_list.addView(item);
+
+
+                        //grab the rest of the workout specifics
+                        database.child("Users").child(ID).child("Week").child(spinner.getSelectedItem().toString()).addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                for(DataSnapshot snap : dataSnapshot.getChildren()){
+                                    if(!snap.getKey().equals("Day")){
+                                        LinearLayout.LayoutParams lparams = new LinearLayout.LayoutParams(
+                                                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                                        TextView item2 = new TextView(MainActivity.this);
+                                        item2.setLayoutParams(lparams);
+                                        item2.setText(snap.getKey().toString() + "          " + snap.getValue().toString());
+                                        workout_list.addView(item2);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
 
         //buttons
