@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         name = getIntent().getStringExtra("name"); //grab the name
-        ID = getIntent().getStringExtra("id");
+        ID = getIntent().getStringExtra("id"); //grab the ID
 
         //store name and id in database
         final DatabaseReference database = FirebaseDatabase.getInstance().getReference();
@@ -53,13 +53,13 @@ public class MainActivity extends AppCompatActivity {
 //            @Override
 //            public void onDataChange(DataSnapshot snapshot) {
 //                if (!snapshot.hasChild("Week")) {
-//                    database.child("Users").child(id).child("Week").child("Sunday");
-//                    database.child("Users").child(id).child("Week").child("Monday").setValue("Off day");
-//                    database.child("Users").child(id).child("Week").child("Tuesday").setValue("Off day");
-//                    database.child("Users").child(id).child("Week").child("Wednesday").setValue("Off day");
-//                    database.child("Users").child(id).child("Week").child("Thursday").setValue("Off day");
-//                    database.child("Users").child(id).child("Week").child("Friday").setValue("Off day");
-//                    database.child("Users").child(id).child("Week").child("Saturday").setValue("Off day");
+//                    database.child("Users").child(ID).child("Week").child("Sunday");
+//                    database.child("Users").child(ID).child("Week").child("Monday").setValue("Off day");
+//                    database.child("Users").child(ID).child("Week").child("Tuesday").setValue("Off day");
+//                    database.child("Users").child(ID).child("Week").child("Wednesday").setValue("Off day");
+//                    database.child("Users").child(ID).child("Week").child("Thursday").setValue("Off day");
+//                    database.child("Users").child(ID).child("Week").child("Friday").setValue("Off day");
+//                    database.child("Users").child(ID).child("Week").child("Saturday").setValue("Off day");
 //                }
 //            }
 //
@@ -101,7 +101,10 @@ public class MainActivity extends AppCompatActivity {
         edit_workout_btn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                startActivity(new Intent(MainActivity.this, EditWorkoutActivity.class));
+                Intent startIntent = new Intent(MainActivity.this, EditWorkoutActivity.class );
+                startIntent.putExtra("name",name);
+                startIntent.putExtra("id",ID);
+                startActivityForResult(startIntent, 1);
             }
 
         });
